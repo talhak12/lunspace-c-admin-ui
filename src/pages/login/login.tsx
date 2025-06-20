@@ -1,35 +1,45 @@
-import {
-  Layout,
-  Card,
-  Space,
-  Form,
-  Input,
-  Checkbox,
-  Button,
-  Flex,
-  Alert,
-} from 'antd';
+import { Layout, Card, Space, Form, Input, Checkbox, Button, Flex } from 'antd';
 import { LockFilled, UserOutlined, LockOutlined } from '@ant-design/icons';
 
 import Logo from '../../components/icons/Logo';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
 import type { Credentials } from '../../types';
-import { login } from '../../http/api';
+import { login, self } from '../../http/api';
 
 const loginUser = async (userData: Credentials) => {
-  //console.log(userData.email);
-  //console.log(userData.password);
   const { data } = await login(userData);
   return data;
 };
 
+const getSelf = async () => {
+  const { data } = await self();
+  return data;
+};
+
 const LoginPage = () => {
-  const { mutate, isPending, isError } = useMutation({
+  const { data: selfData, refetch } = useQuery({
+    queryKey: ['self'],
+    queryFn: getSelf,
+    enabled: false,
+  });
+
+  const { mutate, isPending, isError, error } = useMutation({
     mutationKey: ['login'],
     mutationFn: loginUser,
-    onSuccess: async () => {
-      console.log('Login successful');
+
+    onError: (error, variables, context) => {
+      // An error happened!
+      console.log(`rolling back optimistic update with id`, error);
+    },
+    onSuccess: (data, variables, context) => {
+      // Boom baby!
+      refetch();
+      console.log('x', selfData);
+    },
+    onSettled: (data, error, variables, context) => {
+      // Error or success... doesn't matter!
+      console.log('z', data);
     },
   });
 
@@ -68,7 +78,7 @@ const LoginPage = () => {
               initialValues={{ remember: true, username: 'test' }}
               onFinish={(values) => {
                 mutate({ email: values.username, password: values.password });
-                console.log(values);
+                //console.log(values);
               }}
             >
               <Form.Item
