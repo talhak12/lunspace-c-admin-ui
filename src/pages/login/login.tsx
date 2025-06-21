@@ -5,7 +5,9 @@ import Logo from '../../components/icons/Logo';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 import type { Credentials } from '../../types';
-import { login, self } from '../../http/api';
+import { login, self, logout } from '../../http/api';
+import { useAuthStore } from '../../store';
+import { usePermission } from '../../hooks/usePermission';
 
 const loginUser = async (userData: Credentials) => {
   const { data } = await login(userData);
@@ -18,28 +20,33 @@ const getSelf = async () => {
 };
 
 const LoginPage = () => {
-  const { data: selfData, refetch } = useQuery({
+  const { isAllowed } = usePermission();
+
+  const { setUser, logout: logoutFromStore } = useAuthStore();
+
+  const { refetch } = useQuery({
     queryKey: ['self'],
     queryFn: getSelf,
     enabled: false,
   });
 
-  const { mutate, isPending, isError, error } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationKey: ['login'],
     mutationFn: loginUser,
 
-    onError: (error, variables, context) => {
+    onError: (error) => {
       // An error happened!
       console.log(`rolling back optimistic update with id`, error);
     },
-    onSuccess: (data, variables, context) => {
+    onSuccess: async () => {
       // Boom baby!
-      refetch();
-      console.log('x', selfData);
-    },
-    onSettled: (data, error, variables, context) => {
-      // Error or success... doesn't matter!
-      console.log('z', data);
+      const selfDataPromise = await refetch();
+      if (!isAllowed(selfDataPromise.data)) {
+        await logout();
+        logoutFromStore();
+        return;
+      }
+      setUser(selfDataPromise.data);
     },
   });
 
