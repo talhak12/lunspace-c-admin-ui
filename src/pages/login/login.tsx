@@ -19,6 +19,11 @@ const getSelf = async () => {
   return data;
 };
 
+const logoutUser = async () => {
+  const { data } = await logout();
+  return data;
+};
+
 const LoginPage = () => {
   const { isAllowed } = usePermission();
 
@@ -28,6 +33,15 @@ const LoginPage = () => {
     queryKey: ['self'],
     queryFn: getSelf,
     enabled: false,
+  });
+
+  const { mutate: logoutMutate } = useMutation({
+    mutationKey: ['logout'],
+    mutationFn: logoutUser,
+    onSuccess: async () => {
+      logoutFromStore();
+      return;
+    },
   });
 
   const { mutate, isPending } = useMutation({
@@ -42,8 +56,7 @@ const LoginPage = () => {
       // Boom baby!
       const selfDataPromise = await refetch();
       if (!isAllowed(selfDataPromise.data)) {
-        await logout();
-        logoutFromStore();
+        logoutMutate();
         return;
       }
       setUser(selfDataPromise.data);
