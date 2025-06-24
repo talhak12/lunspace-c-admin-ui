@@ -133,16 +133,12 @@ const Dashboard = () => {
               </Space>
             </Flex>
           </Header>
-          <Content style={{ margin: '0 16px' }}>
-            <Breadcrumb
-              style={{ margin: '16px 0' }}
-              items={[{ title: 'User' }, { title: 'Bill' }]}
-            />
+          <Content style={{ margin: '16px' }}>
             <div
               style={{
-                padding: 24,
-                minHeight: 360,
-                background: colorBgContainer,
+                padding: 12,
+                minHeight: '100%',
+                background: '#eeef', //colorBgContainer,
                 //borderRadius: borderRadiusLG,
               }}
             >
