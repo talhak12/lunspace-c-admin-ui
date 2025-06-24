@@ -4,6 +4,7 @@ import { data, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getUsers } from '../../http/api';
 import type { User } from '../../types';
+import UsersFilters from './UserFilters';
 
 const Users = () => {
   const logoutUser = async () => {
@@ -49,6 +50,8 @@ const Users = () => {
           separator={<RightOutlined />}
           items={[{ title: <Link to="/">Dashboard</Link> }, { title: 'Users' }]}
         />
+
+        <UsersFilters />
 
         {data && data.user && (
           <Table dataSource={data.user} columns={columns} />
