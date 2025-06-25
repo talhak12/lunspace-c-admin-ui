@@ -51,10 +51,14 @@ const Users = () => {
           items={[{ title: <Link to="/">Dashboard</Link> }, { title: 'Users' }]}
         />
 
-        <UsersFilters />
+        <UsersFilters
+          onFilterChange={(filterName: string, filterValue: string) => {
+            console.log(`Filter changed: ${filterName} = ${filterValue}`);
+          }}
+        />
 
         {data && data.user && (
-          <Table dataSource={data.user} columns={columns} />
+          <Table dataSource={data.user} columns={columns} rowKey={'id'} />
         )}
       </Space>
     </>
