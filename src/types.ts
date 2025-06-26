@@ -12,6 +12,16 @@ export type User = {
   updatedAt: string;
 };
 
+export type CreateUserData = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  password: string;
+  role: string;
+  tenantId: number;
+};
+
 export type Tenant = {
   id: string;
   name: string;

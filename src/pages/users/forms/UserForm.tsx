@@ -1,7 +1,7 @@
 import { Card, Col, Form, Input, Row, Select } from 'antd';
 import { getTenants } from '../../../http/api';
 import { useQuery } from '@tanstack/react-query';
-import { Tenant } from '../../../types';
+import type { Tenant } from '../../../types';
 
 const UserForm = () => {
   const getTenants1 = async () => {
@@ -62,7 +62,11 @@ const UserForm = () => {
           {/* User form content goes here */}
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item label="Role" name="role">
+              <Form.Item
+                label="Role"
+                name="role"
+                rules={[{ required: true, message: 'Please select a role!' }]}
+              >
                 <Select
                   allowClear={true}
                   onChange={() => {}}

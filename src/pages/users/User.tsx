@@ -1,14 +1,20 @@
 import { Breadcrumb, Button, Drawer, Form, Space, Table, theme } from 'antd';
 import { PlusOutlined, RightOutlined } from '@ant-design/icons';
-import { data, Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { getUsers } from '../../http/api';
-import type { User } from '../../types';
+import { Link } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { createUsers, getUsers } from '../../http/api';
+
+import type { CreateUserData } from '../../types';
+
 import UsersFilters from './UserFilters';
 import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import UserForm from './forms/UserForm';
 
 const Users = () => {
+  const [form] = Form.useForm();
+  const queryClient = useQueryClient();
+
   const {
     token: { colorBgLayout },
   } = theme.useToken();
@@ -56,8 +62,33 @@ const Users = () => {
   };
 
   const onClose = () => {
+    form.resetFields();
     setDrawerOpen(false);
     //setOpen(false);
+  };
+
+  const createUser = async (userData: CreateUserData) => {
+    const { data } = await createUsers(userData);
+    return data;
+    //console.log('gando' + userData);
+  };
+
+  const { mutate: createUserMutate } = useMutation({
+    mutationKey: ['createUser'],
+    mutationFn: createUser,
+    onSuccess: async () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      return;
+    },
+  });
+
+  const onHandleSubmit = async () => {
+    //await form.validateFields();
+    //console.log('Form submitted:', form.getFieldsValue());
+    createUserMutate(form.getFieldsValue());
+    setDrawerOpen(false);
+    form.resetFields();
+    //console.log('Form reset');
   };
 
   return (
@@ -100,11 +131,13 @@ const Users = () => {
           extra={
             <Space>
               <Button onClick={onClose}>Cancel</Button>
-              <Button type="primary">Submit</Button>
+              <Button type="primary" onClick={onHandleSubmit}>
+                Submit
+              </Button>
             </Space>
           }
         >
-          <Form layout="vertical" hideRequiredMark>
+          <Form layout="vertical" form={form} hideRequiredMark>
             <UserForm />
           </Form>
         </Drawer>
