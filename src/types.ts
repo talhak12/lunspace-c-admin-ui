@@ -11,3 +11,9 @@ export type User = {
   createdAt: string;
   updatedAt: string;
 };
+
+export type Tenant = {
+  id: string;
+  name: string;
+  address: string;
+};
