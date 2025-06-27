@@ -10,6 +10,7 @@ import UsersFilters from './UserFilters';
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import UserForm from './forms/UserForm';
+import { PER_PAGE } from '../../constants';
 
 const Users = () => {
   const [form] = Form.useForm();
@@ -20,15 +21,28 @@ const Users = () => {
   } = theme.useToken();
 
   const logoutUser = async () => {
-    const { data } = await getUsers();
-    console.log('Users data:', data.user);
+    const queryString = new URLSearchParams(
+      queryParams as unknown as Record<string, string>
+    ).toString();
+
+    console.log('queryString:', queryString);
+
+    const { data } = await getUsers(queryString);
+    console.log('data:', data);
     return data;
   };
+
+  const [queryParams, setQueryParams] = useState({
+    perPage: PER_PAGE,
+    currentPage: 1,
+    sort: 'id',
+    order: 'asc',
+  });
 
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const { data } = useQuery({
-    queryKey: ['users'],
+    queryKey: ['users', queryParams],
     queryFn: logoutUser,
   });
 
@@ -115,8 +129,26 @@ const Users = () => {
           </Button>
         </UsersFilters>
 
-        {data && data.user && (
-          <Table dataSource={data.user} columns={columns} rowKey={'id'} />
+        {data && data.data && (
+          <Table
+            pagination={{
+              pageSize: queryParams.perPage,
+              current: queryParams.currentPage,
+              total: data?.total,
+              onChange: (page, pageSize) => {
+                console.log('Page changed:', page, pageSize);
+
+                setQueryParams({
+                  ...queryParams,
+                  currentPage: page,
+                  perPage: pageSize,
+                });
+              },
+            }}
+            dataSource={data?.data}
+            columns={columns}
+            rowKey={'id'}
+          />
         )}
 
         <Drawer

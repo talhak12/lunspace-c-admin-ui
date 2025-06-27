@@ -88,6 +88,7 @@ const UserForm = () => {
                   style={{ width: '100%' }}
                   options={
                     data?.map((tenant: Tenant) => ({
+                      key: tenant.id,
                       value: tenant.id,
                       label: tenant.name,
                     })) || []
