@@ -32,7 +32,7 @@ const Root = () => {
   }, [data, setUser]);
 
   if (isLoading) {
-    return <div>Loading ...</div>;
+    //return <div>Loading ...</div>;
   }
 
   return <Outlet />;
