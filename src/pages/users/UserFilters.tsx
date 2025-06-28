@@ -1,40 +1,41 @@
 import { PlusOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Input, Row, Select } from 'antd';
+import { Button, Card, Col, Form, Input, Row, Select } from 'antd';
 
 type UsersFiltersProps = {
   children?: React.ReactNode;
-  onFilterChange?: (filterName: string, filterValue: string) => void;
+  //onFilterChange?: (filterName: string, filterValue: string) => void;
 };
 
-const UsersFilters = ({ onFilterChange, children }: UsersFiltersProps) => {
+const UsersFilters = ({ children }: UsersFiltersProps) => {
   return (
     <Card>
       <Row justify={'space-between'}>
         <Col>
           <Row gutter={20} align="middle">
-            <Col>
-              <Input.Search
-                allowClear={true}
-                placeholder="Search"
-                onChange={(e) => onFilterChange('statusFilter', e.target.value)}
-              />
+            <Col span={8}>
+              <Form.Item name="q">
+                <Input.Search
+                  allowClear={true}
+                  placeholder="Search"
+                  //onChange={(e) => onFilterChange('statusFilter', e.target.value)}
+                />
+              </Form.Item>
             </Col>
             <Col>
-              <Select
-                allowClear={true}
-                //defaultValue="Admin"
-                style={{ width: 120 }}
-                onChange={(selectedItem) =>
-                  onFilterChange('roleFilter', selectedItem)
-                }
-                options={[
-                  { value: 'Admin', label: 'Admin' },
-                  { value: 'Customer', label: 'Customer' },
-                  { value: 'Manager', label: 'Manager' },
-                ]}
-              />
+              <Form.Item name="role">
+                <Select
+                  allowClear={true}
+                  //defaultValue="Admin"
+                  style={{ width: 120 }}
+                  options={[
+                    { value: 'Admin', label: 'Admin' },
+                    { value: 'Customer', label: 'Customer' },
+                    { value: 'Manager', label: 'Manager' },
+                  ]}
+                />
+              </Form.Item>
             </Col>
-            <Col>
+            {/*<Col>
               <Select
                 allowClear={true}
                 //defaultValue="Active"
@@ -47,7 +48,7 @@ const UsersFilters = ({ onFilterChange, children }: UsersFiltersProps) => {
                   { value: 'Banned', label: 'Banned' },
                 ]}
               />
-            </Col>
+            </Col>*/}
           </Row>
         </Col>
         <Col>{children}</Col>

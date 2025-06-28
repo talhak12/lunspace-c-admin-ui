@@ -22,7 +22,7 @@ import {
 } from '@tanstack/react-query';
 import { createUsers, getUsers } from '../../http/api';
 
-import type { CreateUserData } from '../../types';
+import type { CreateUserData, FieldData } from '../../types';
 
 import UsersFilters from './UserFilters';
 import { useState } from 'react';
@@ -32,6 +32,8 @@ import { PER_PAGE } from '../../constants';
 
 const Users = () => {
   const [form] = Form.useForm();
+  const [filterForm] = Form.useForm();
+
   const queryClient = useQueryClient();
 
   const {
@@ -39,8 +41,12 @@ const Users = () => {
   } = theme.useToken();
 
   const logoutUser = async () => {
+    const filteredParams = Object.fromEntries(
+      Object.entries(queryParams).filter((item) => !!item[1])
+    );
+
     const queryString = new URLSearchParams(
-      queryParams as unknown as Record<string, string>
+      filteredParams as unknown as Record<string, string>
     ).toString();
 
     console.log('queryString:', queryString);
@@ -125,6 +131,23 @@ const Users = () => {
     //console.log('Form reset');
   };
 
+  const onFilterChange = (changedFields: FieldData[]) => {
+    console.log('Filter changed:', changedFields);
+
+    const changedFilterFields = changedFields
+      .map((item) => ({
+        [item.name[0]]: item.value?.toString().toLowerCase(),
+      }))
+      .reduce((acc, curr) => ({ ...acc, ...curr }), {});
+
+    console.log('Changed filter fields:', changedFilterFields);
+
+    setQueryParams((prev) => ({
+      ...prev,
+      ...changedFilterFields,
+    }));
+  };
+
   return (
     <>
       <Space direction="vertical" style={{ width: '100%' }}>
@@ -144,21 +167,19 @@ const Users = () => {
           )}
         </Flex>
 
-        <UsersFilters
-          onFilterChange={(filterName: string, filterValue: string) => {
-            console.log(`Filter changed: ${filterName} = ${filterValue}`);
-          }}
-        >
-          <Button
-            onClick={showDrawer}
-            type="primary"
-            size="large"
-            style={{ width: 150 }}
-          >
-            <PlusOutlined />
-            Add User1
-          </Button>
-        </UsersFilters>
+        <Form form={filterForm} onFieldsChange={onFilterChange}>
+          <UsersFilters>
+            <Button
+              onClick={showDrawer}
+              type="primary"
+              size="large"
+              style={{ width: 150 }}
+            >
+              <PlusOutlined />
+              Add User1
+            </Button>
+          </UsersFilters>
+        </Form>
 
         {data && data.data && (
           <Table
