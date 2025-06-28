@@ -29,6 +29,8 @@ import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import UserForm from './forms/UserForm';
 import { PER_PAGE } from '../../constants';
+import { debounce } from 'lodash';
+import React from 'react';
 
 const Users = () => {
   const [form] = Form.useForm();
@@ -95,6 +97,15 @@ const Users = () => {
       dataIndex: 'role',
       key: 'role',
     },
+
+    {
+      title: 'Restaurant',
+      dataIndex: 'tenant',
+      key: 'tenant',
+      render: (_text: string, record: User) => {
+        return record.tenant ? record.tenant.name : 'N/A';
+      },
+    },
   ];
 
   const showDrawer = () => {
@@ -131,6 +142,15 @@ const Users = () => {
     //console.log('Form reset');
   };
 
+  const debouncedQUpdate = React.useMemo(() => {
+    return debounce((value: string | undefined) => {
+      setQueryParams((prev) => ({
+        ...prev,
+        q: value?.toString().toLowerCase(),
+      }));
+    }, 1000);
+  }, []);
+
   const onFilterChange = (changedFields: FieldData[]) => {
     console.log('Filter changed:', changedFields);
 
@@ -140,12 +160,17 @@ const Users = () => {
       }))
       .reduce((acc, curr) => ({ ...acc, ...curr }), {});
 
-    console.log('Changed filter fields:', changedFilterFields);
+    console.log(changedFilterFields.q);
 
-    setQueryParams((prev) => ({
-      ...prev,
-      ...changedFilterFields,
-    }));
+    if ('q' in changedFilterFields) {
+      console.log('d');
+      debouncedQUpdate(changedFilterFields.q);
+    } else {
+      setQueryParams((prev) => ({
+        ...prev,
+        ...changedFilterFields,
+      }));
+    }
   };
 
   return (
