@@ -147,6 +147,7 @@ const Users = () => {
       setQueryParams((prev) => ({
         ...prev,
         q: value?.toString().toLowerCase(),
+        currentPage: 1,
       }));
     }, 1000);
   }, []);
@@ -169,6 +170,7 @@ const Users = () => {
       setQueryParams((prev) => ({
         ...prev,
         ...changedFilterFields,
+        currentPage: 1,
       }));
     }
   };
@@ -209,6 +211,9 @@ const Users = () => {
         {data && data.data && (
           <Table
             pagination={{
+              showTotal: (total, range) =>
+                `Showing ${range[0]}-${range[1]} of ${total} items`,
+              showSizeChanger: true,
               pageSize: queryParams.perPage,
               current: queryParams.currentPage,
               total: data?.total,
