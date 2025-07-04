@@ -22,19 +22,20 @@ import {
 } from '@tanstack/react-query';
 import { createUsers, getUsers } from '../../http/api';
 
-import type { CreateUserData, FieldData } from '../../types';
+import type { CreateUserData, FieldData, User } from '../../types';
 
 import UsersFilters from './UserFilters';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import UserForm from './forms/UserForm';
 import { PER_PAGE } from '../../constants';
-import { debounce } from 'lodash';
+import { debounce, set } from 'lodash';
 import React from 'react';
 
 const Users = () => {
   const [form] = Form.useForm();
   const [filterForm] = Form.useForm();
+  const [currentUser, setCurrentUser] = React.useState<User | null>(null);
 
   const queryClient = useQueryClient();
 
@@ -67,6 +68,19 @@ const Users = () => {
   });
 
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    if (currentUser) {
+      setDrawerOpen(true);
+      form.setFieldsValue({
+        ...currentUser,
+        tenant: currentUser.tenant?.id || null,
+      });
+      //
+    } else {
+      //form.resetFields();
+    }
+  }, [currentUser, form]);
 
   const { data, isFetching } = useQuery({
     queryKey: ['users', queryParams],
@@ -108,7 +122,10 @@ const Users = () => {
     },
   ];
 
-  const showDrawer = () => {
+  const showDrawer = (p: boolean | null) => {
+    if (p) {
+      setCurrentUser(null);
+    }
     setDrawerOpen(true);
   };
 
@@ -197,7 +214,7 @@ const Users = () => {
         <Form form={filterForm} onFieldsChange={onFilterChange}>
           <UsersFilters>
             <Button
-              onClick={showDrawer}
+              onClick={() => showDrawer(true)}
               type="primary"
               size="large"
               style={{ width: 150 }}
@@ -228,13 +245,33 @@ const Users = () => {
               },
             }}
             dataSource={data?.data}
-            columns={columns}
+            columns={[
+              ...columns,
+              {
+                title: 'Actions',
+                key: 'actions',
+                render: (_text: string, record: User) => (
+                  <Space size="middle">
+                    <Button
+                      type="link"
+                      onClick={() => {
+                        console.log('record', record);
+                        setCurrentUser(record);
+                        showDrawer(false);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                  </Space>
+                ),
+              },
+            ]}
             rowKey={'id'}
           />
         )}
 
         <Drawer
-          title="Create User"
+          title={currentUser != null ? 'Edit User' : 'Current User'}
           width={720}
           styles={{
             body: { backgroundColor: colorBgLayout },
@@ -252,7 +289,7 @@ const Users = () => {
           }
         >
           <Form layout="vertical" form={form} hideRequiredMark>
-            <UserForm />
+            <UserForm isEdit={currentUser != null ? true : false} />
           </Form>
         </Drawer>
       </Space>

@@ -3,7 +3,9 @@ import { getTenants } from '../../../http/api';
 import { useQuery } from '@tanstack/react-query';
 import type { Tenant } from '../../../types';
 
-const UserForm = () => {
+const UserForm = ({ isEdit }) => {
+  console.log({ isEdit });
+
   const getTenants1 = async () => {
     const { data } = await getTenants();
     console.log('Tenant data:', data);
@@ -68,6 +70,7 @@ const UserForm = () => {
                 rules={[{ required: true, message: 'Please select a role!' }]}
               >
                 <Select
+                  id="selectBoxInUserForm"
                   allowClear={true}
                   onChange={() => {}}
                   style={{ width: '100%' }}

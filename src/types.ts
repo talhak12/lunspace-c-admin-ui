@@ -6,7 +6,7 @@ export type Credentials = {
 export type User = {
   id: string;
   email: string;
-  fistName: string;
+  firstName: string;
   lastName: string;
   createdAt: string;
   updatedAt: string;
